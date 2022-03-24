@@ -13,6 +13,7 @@ jobs:
         - uses: actions/setup-node@v2
           with:
             node-version: '16'
+            
         - uses: akhileshns/heroku-deploy@v3.8.9 # This is the action
           with:
             heroku_api_key: ${{secrets.HEROKU_API_KEY}}
