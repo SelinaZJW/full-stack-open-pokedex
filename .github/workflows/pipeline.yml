@@ -18,6 +18,7 @@ jobs:
             node-version: '16'
 
         - uses: akhileshns/heroku-deploy@v3.8.9 # This is the action
+          if: ${{ github.event_name == 'push' }}
           with:
             heroku_api_key: ${{secrets.HEROKU_API_KEY}}
             heroku_app_name: 'blooming-spire-39399'
