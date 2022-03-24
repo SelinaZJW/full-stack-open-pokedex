@@ -7,7 +7,15 @@ const PORT = process.env.PORT || 5000
 
 app.use(express.static('dist'))
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   // eslint-disable-next-line no-console
   console.log('server started on port 5000')
+})
+
+app.get('/health', (_req, res) => {
+  res.send('ok')
+})
+
+app.get('/version', (_req, res) => {
+  res.send('1.1') // change this string to ensure a new version deployed
 })

@@ -13,12 +13,15 @@ jobs:
         - uses: actions/setup-node@v2
           with:
             node-version: '16'
-            
+
         - uses: akhileshns/heroku-deploy@v3.8.9 # This is the action
           with:
             heroku_api_key: ${{secrets.HEROKU_API_KEY}}
             heroku_app_name: 'blooming-spire-39399'
             heroku_email: 'jiawen.selina.zheng@gmail.com'
+            healthcheck: 'https://blooming-spire-39399.herokuapp.com/health'
+            checkstring: 'ok'
+            rollbackonhealthcheckfailed: true
             
         - name: npm install
           run: npm install
