@@ -17,15 +17,7 @@ jobs:
         with:
           node-version: '16'
 
-      - uses: akhileshns/heroku-deploy@v3.8.9 # This is the action
-        if: ${{ github.event_name == 'push' }}
-        with:
-          heroku_api_key: ${{secrets.HEROKU_API_KEY}}
-          heroku_app_name: 'blooming-spire-39399'
-          heroku_email: 'jiawen.selina.zheng@gmail.com'
-          healthcheck: 'https://blooming-spire-39399.herokuapp.com/health'
-          checkstring: 'ok'
-          rollbackonhealthcheckfailed: true
+      
           
       - name: npm install
         run: npm install
@@ -35,6 +27,13 @@ jobs:
 
       - name: build
         run: npm run build
+      - name: build failed
+        uses: rjstone/discord-webhook-notify@v1.0.4
+        if: ${{ failure() }}
+        with:
+          severity: error
+          details: build failed!
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
 
       - name: test
         run: npm test
@@ -45,6 +44,26 @@ jobs:
           command: npm run test:e2e
           start: npm run start-prod
           wait-on: http://localhost:5000
+        
+      - name: deploy Heroku
+        uses: akhileshns/heroku-deploy@v3.8.9 # This is the action
+        if: ${{ github.event_name == 'push' }}
+        with:
+          heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+          heroku_app_name: 'blooming-spire-39399'
+          heroku_email: 'jiawen.selina.zheng@gmail.com'
+          healthcheck: 'https://blooming-spire-39399.herokuapp.com/health'
+          checkstring: 'ok'
+          rollbackonhealthcheckfailed: true
+      - name: deploy succeeded
+        uses: rjstone/discord-webhook-notify@v1.0.4
+        if: ${{ success() }}
+        with:
+          severity: info
+          details: A new version is deployed!
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
+
+     
   
   tag_release:
     needs: [simple_deployment_pipeline]
@@ -54,7 +73,8 @@ jobs:
         with:
           fetch-depth: '0'
       - name: Bump version and push tag
-        uses: anothrNick/github-tag-action@1.36.0
+        uses: anothrNick/github-tag-action@ce4b5ffa38e072fa7a901e417253c438fcc2ccce 
+                                          # changed version from semantic to hash, to use a particular commit
         if: ${{ github.event_name == 'push' && ( ! contains(join(toJson(github.event.commits.*.message)), '#skip')) }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
