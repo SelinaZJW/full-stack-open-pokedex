@@ -17,8 +17,6 @@ jobs:
         with:
           node-version: '16'
 
-      
-          
       - name: npm install
         run: npm install
 
@@ -27,14 +25,7 @@ jobs:
 
       - name: build
         run: npm run build
-      - name: build failed
-        uses: rjstone/discord-webhook-notify@v1.0.4
-        if: ${{ failure() }}
-        with:
-          severity: error
-          details: build failed!
-          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
-
+      
       - name: test
         run: npm test
 
@@ -55,14 +46,23 @@ jobs:
           healthcheck: 'https://blooming-spire-39399.herokuapp.com/health'
           checkstring: 'ok'
           rollbackonhealthcheckfailed: true
-      - name: deploy succeeded
+
+      - name: build success 
         uses: rjstone/discord-webhook-notify@v1.0.4
-        if: ${{ success() }}
+        if: success()
         with:
           severity: info
           details: A new version is deployed!
+          description: to https://blooming-spire-39399.herokuapp.com by ${{ github.event.head_commit.committer.username }}
           webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
-
+      - name: build failed
+        uses: rjstone/discord-webhook-notify@v1.0.4
+        if: failure()
+        with:
+          severity: error
+          details: build failed!
+          description: commit ${{ github.event.head_commit.url }} by ${{ github.event.head_commit.committer.username }} broke the build :(
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
      
   
   tag_release:
